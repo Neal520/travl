@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.travel.mapper.RouteMapper">
+    <select id="getPopularityRouteList" resultType="Route">
+       select * from tab_route where rflag='1' order by count desc limit 0,4
+    </select>
+    <select id="getNewestRouteList" resultType="Route">
+      SELECT * FROM tab_route WHERE rflag='1' ORDER BY rdate DESC LIMIT 0,4
+    </select>
+    <select id="getThemeRouteList" resultType="Route">
+       SELECT * FROM tab_route WHERE rflag='1' and isThemeTour='1' ORDER BY rdate DESC LIMIT 0,4
+    </select>
+    <select id="findRouteListByPage" resultType="Route">
+       SELECT * FROM tab_route  WHERE  rflag='1' and cid=${cid}
+       <if test="rname!=null and rname.trim()!=''">
+           and rname like '%' #{rname} '%'
+       </if>
+    </select>
+    <!--<select id="getCountByCid" resultType="int">-->
+        <!--SELECT COUNT(*) FROM tab_route WHERE rflag='1' AND cid=#{cid}-->
+        <!--<if test="rname!=null and rname.trim()!=''">-->
+            <!--and rname like '%' #{rname} '%'-->
+        <!--</if>-->
+    <!--</select>-->
+    <resultMap type="Route" id="routeCategorySellerImg" autoMapping="true">
+        <id column="rid" property="rid"/>
+        <association property="category" javaType="Category" autoMapping="true">
+            <id column="cid" property="cid"/>
+        </association>
+        <association property="seller" javaType="Seller" autoMapping="true">
+            <id column="sid" property="sid"/>
+        </association>
+        <collection property="routeImgList" javaType="list" ofType="RouteImg" autoMapping="true">
+            <id column="rgid" property="rgid"/>
+        </collection>
+    </resultMap>
+    <select id="findRouteByRid" resultMap="routeCategorySellerImg">
+        SELECT
+        *
+        FROM
+        tab_route r,
+        tab_category c,
+        tab_seller s,
+        tab_route_img i
+        WHERE
+        r.cid = c.cid
+        AND r.sid = s.sid
+        and r.rid = i.rid
+        AND r.rflag = '1'
+        AND r.rid =#{rid}
+    </select>
+</mapper>
